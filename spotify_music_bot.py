@@ -3,6 +3,7 @@ import re
 import json
 import asyncio
 import base64
+from aiohttp import web
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
@@ -15,7 +16,7 @@ from pyrogram.types import (
     InlineKeyboardButton,
     CallbackQuery,
 )
-from pyrogram.enums import ParseMode, ButtonStyle
+from pyrogram.enums import ParseMode
 
 import config
 import mongodb
@@ -29,7 +30,7 @@ async def start_health_server():
     port = int(os.getenv("PORT", "8000"))
     await web.TCPSite(runner, "0.0.0.0", port).start()
     print(f"[health] listening on port {port}")
-    
+
 DOWNLOAD_DIR = "./downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
@@ -240,16 +241,23 @@ async def log_new_user(bot: Client, user) -> None:
         f"<b>Username :</b>  {username}"
         "</blockquote>"
     )
+    # ✅ Fixed: use get_profile_photos instead of get_chat_photos
     photos = []
     try:
         async for photo in bot.get_chat_photos(user.id, limit=1):
             photos.append(photo)
     except Exception:
         pass
+
     try:
         if photos:
-            await bot.send_photo(config.LOG_CHANNEL, photos[0].file_id,
-                                 caption=text, parse_mode=ParseMode.HTML)
+            # ✅ Fixed: use big_file_id instead of file_id for ChatPhoto
+            await bot.send_photo(
+                config.LOG_CHANNEL,
+                photos[0].big_file_id,
+                caption=text,
+                parse_mode=ParseMode.HTML
+            )
         else:
             await bot.send_message(config.LOG_CHANNEL, text, parse_mode=ParseMode.HTML)
     except Exception as e:
@@ -449,13 +457,14 @@ async def main():
         bot_token=config.BOT_TOKEN,
     )
 
-    bot.add_handler(MessageHandler(cmd_start,        filters.command("start") & filters.private))
-    bot.add_handler(CallbackQueryHandler(cb_credits,  filters.regex("^credits$")))
+    bot.add_handler(MessageHandler(cmd_start, filters.command("start") & filters.private))
+    bot.add_handler(CallbackQueryHandler(cb_credits, filters.regex("^credits$")))
     bot.add_handler(MessageHandler(handle_message,
                                    filters.text & filters.private & ~filters.command(["start"])))
 
     await mongodb.connect()
     await bot.start()
+    await start_health_server()  # ✅ Fixed: now called in main()
     print("[bot] running — waiting for messages...")
     await idle()
     await bot.stop()
