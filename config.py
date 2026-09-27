@@ -4,15 +4,16 @@ import os
 API_ID    = int(os.getenv("API_ID", "0"))
 API_HASH  = os.getenv("API_HASH", "")
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+OWNER_ID = int(os.getenv("OWNER_ID", "1350212613"))  
 
 # ── developer info ───────────────────────────────────────────────────────────
-DEV_URL = os.getenv("DEV_URL", "https://t.me/DmOwner")
+DEV_URL = os.getenv("DEV_URL", "https://t.me/GUARDIANff")
 
 # ── log channel ──────────────────────────────────────────────────────────────
 # set to your private channel's numeric id, e.g. -1001234567890
 # leave as 0 to disable logging
-LOG_CHANNEL = int(os.getenv("LOG_CHANNEL", "0"))
-
+LOG_CHANNEL = int(os.getenv("LOG_CHANNEL", "-1001583883335"))
+FORCE_SUB = int(os.getenv("FORCE_SUB", "-1001940661697"))
 # ── mongodb ──────────────────────────────────────────────────────────────────
 MONGO_URI = os.getenv("MONGO_URI", "")
-DB_NAME   = os.getenv("DB_NAME", "spoti_music_bot")
+DB_NAME   = os.getenv("DB_NAME", "spoti_music")
