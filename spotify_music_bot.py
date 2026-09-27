@@ -20,7 +20,16 @@ from pyrogram.enums import ParseMode, ButtonStyle
 import config
 import mongodb
 
-
+async def start_health_server():
+    app = web.Application()
+    app.router.add_get("/", lambda r: web.Response(text="OK"))
+    app.router.add_get("/health", lambda r: web.Response(text="OK"))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.getenv("PORT", "8000"))
+    await web.TCPSite(runner, "0.0.0.0", port).start()
+    print(f"[health] listening on port {port}")
+    
 DOWNLOAD_DIR = "./downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
